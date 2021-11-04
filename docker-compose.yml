@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:5
+    restart: always
+    ports:
+      - "7071:27017"
+    volumes:
+      - db:/data/db
+    networks:
+      - project-network
+  mongo-express:
+    image: mongo-express
+    restart: always
+    environment:
+      - ME_CONFIG_MONGODB_URL=mongodb://mongo:27017
+    depends_on:
+      - mongo
+    ports:
+      - "8888:8081"
+    networks:
+      - project-network
+  rabbitmq:
+    image: rabbitmq:3.8-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - project-network
+#  app:
+#    build: ./api
+#    restart: always
+#    volumes:
+#      - ./api:/api
+#    ports:
+#      - "6868:3000"
+#    stdin_open: true
+#    tty: true
+#    depends_on:
+#      - mongo
+#      - rabbitmq
+#    networks:
+#      - project-network
+
+volumes:
+  db:
+networks:
+  project-network:
+    driver: bridge
